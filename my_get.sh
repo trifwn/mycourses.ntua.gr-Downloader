@@ -135,7 +135,9 @@ then
 	echo -e "$RED$COURSE${NC}"
 	wget -q --save-cookies cookies.txt --keep-session-cookies --post-data "login=$login&password=$password" --delete-after https://mycourses.ntua.gr/index.php
 
-	wget -q --load-cookies cookies.txt --delete-after "http://mycourses.ntua.gr/course_description/index.php?cidReq=$COURSE"
+	wget -q --load-cookies cookies.txt -O index.php "http://mycourses.ntua.gr/course_description/index.php?cidReq=$COURSE"
+
+	COURSE=$(cat index.php |grep '<\/h1>' |sed "s/ /_/g" | sed "s/....h1.//")
 
 	wget -q --load-cookies cookies.txt http://mycourses.ntua.gr/document/document.php
 	
@@ -184,6 +186,7 @@ iconv -f greek -t UTF-8 -o data.dat data.dat
 sed -E 's/(\&cidReq\=MECH.*)|(goto..url..)//g' data.dat > correctname.txt
 
 IFS=$'\n' read -d '' -r -a filename < correctname.txt
+ls -la > data.dat
 
 for((i=0; i<$ndowns ; i++));do
 	echo -e "$TABS|---$(echo ${filename[i]} | sed 's:.*/::')"
