@@ -3,6 +3,8 @@
 Script to easily download content and manage local copies of the mycourses.ntua.gr CMS.
 Be sure to share it!!
 
+If we meet some day, and you think this stuff is worth it, you can buy me a beer in return.
+
 # Usage
 ```sh
 $ chmod +x my_get.sh
