@@ -135,9 +135,9 @@ then
 	echo -e "$RED$COURSE${NC}"
 	wget -q --save-cookies cookies.txt --keep-session-cookies --post-data "login=$login&password=$password" --delete-after https://mycourses.ntua.gr/index.php
 
-	wget -q --load-cookies cookies.txt --delete-after "http://mycourses.ntua.gr/course_description/index.php?cidReq=$COURSE"
+	wget -q --load-cookies cookies.txt --delete-after "https://mycourses.ntua.gr/course_description/index.php?cidReq=$COURSE"
 
-	wget -q --load-cookies cookies.txt http://mycourses.ntua.gr/document/document.php
+	wget -q --load-cookies cookies.txt https://mycourses.ntua.gr/document/document.php
 	
 	if ! { [ "$(cat document.php | grep 'login' )" == "" ]; };then 
 		echo -e '\n'"Wrong Username or Password"
@@ -157,12 +157,12 @@ else
 	loc="$WORKDIR/$COURSE$LOCATION"
 	cd $loc
 	echo -e "$TABS${RED}$(echo $LOCATION | sed 's:.*/::')${NC}"
-	wget -q --load-cookies "$WORKDIR/cookies.txt" -P "$WORKDIR/$COURSE/$LOCATION/" -O document.php "http://mycourses.ntua.gr$FILE"
+	wget -q --load-cookies "$WORKDIR/cookies.txt" -P "$WORKDIR/$COURSE/$LOCATION/" -O document.php "https://mycourses.ntua.gr$FILE"
 fi
 TABS="$TABS|   "
-grep -no '<td align="left"><span style="float:left;width:20px">' document.php | awk -F: '{print $1}' > data.dat
+grep -no '<a class="item-file-link simple "' document.php | awk -F: '{print $1}' > data.dat
 
-matches=$( grep -no '<td align="left"><span style="float:left;width:20px">' document.php | wc -l)
+matches=$( grep -no '<a class="item-file-link simple "' document.php | wc -l)
 
 IFS=$'\n' read -d '' -r -a lines < data.dat
 
@@ -187,7 +187,7 @@ IFS=$'\n' read -d '' -r -a filename < correctname.txt
 
 for((i=0; i<$ndowns ; i++));do
 	echo -e "$TABS|---$(echo ${filename[i]} | sed 's:.*/::')"
-	wget -q -O "$WORKDIR/$COURSE/${filename[i]}" "http://mycourses.ntua.gr/document/${downs[i]}" 
+	wget -q -O "$WORKDIR/$COURSE/${filename[i]}" "https://mycourses.ntua.gr/document/${downs[i]}" 
 done
 
 nfolders=$( cat folders.txt | wc -l);
