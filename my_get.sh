@@ -107,12 +107,13 @@ then
 		exit 1
 	fi
 
-	cat index.php |grep '<a href=".*" class="menu">' | sed -E 's/( +|\t|<a href\=.*courses\/)|(...class..menu..)//g' > data.dat
+	cat index.php | grep -a '<a href=".*" class = "listcourse' |  sed -E 's/( +|\t|<a href\=.*courses\/)|(...class = "listcourse.*)//g' > data.dat
 	ncourses=$( cat data.dat | wc -l)
 	IFS=$'\n\r' read -d '' -r -a COURSE < data.dat
 
 	rm index.php data.dat
 	for((i=0; i<$ncourses ; i++)); do
+		echo ${COURSE[i]}
 		./"$BASH_SOURCE" -c "${COURSE[i]}" -u "$login" -p "$password" -ow; 
 	done
 	end=`date +%s`
@@ -135,7 +136,15 @@ then
 	echo -e "$RED$COURSE${NC}"
 	wget -q --save-cookies cookies.txt --keep-session-cookies --post-data "login=$login&password=$password" --delete-after https://mycourses.ntua.gr/index.php
 
-	wget -q --load-cookies cookies.txt --delete-after "https://mycourses.ntua.gr/course_description/index.php?cidReq=$COURSE"
+	wget -q --load-cookies cookies.txt -O index.php "https://mycourses.ntua.gr/course_description/index.php?cidReq=$COURSE"
+
+	#COURSE=$(cat index.php |grep -a 'class="row coursetitle"' |sed "s/ /_/g" | sed "s/....h1.//")
+	cat index.php | LANG=en_US.UTF-8  grep -oaP '<div class="row coursetitle">.*<\/div><div' | sed 's/<div class="row coursetitle">//' | sed 's/<\/div><div.*//' > correctCourseName.txt
+	iconv -f greek -t UTF-8 -o correctCourseName.txt correctCourseName.txt
+	COURSE=$(cat correctCourseName.txt | sed 's/ /_/g')
+	#IFS=$'\n' read -d '\n' -r -a COURSE < correctCourseName.txt
+	
+	echo $COURSE
 
 	wget -q --load-cookies cookies.txt https://mycourses.ntua.gr/document/document.php
 	
@@ -146,6 +155,7 @@ then
 	fi
 	
 	TABS="";
+	echo "Making Course Folder"
 	mkdir $COURSE
 	WORKDIR=$(pwd)
 	start=`date +%s`
@@ -181,9 +191,10 @@ IFS=$'\n' read -d '' -r -a downs < download.txt
 
 cat download.txt |  sed "s@+@ @g;s@%@\\\\x@g" | xargs -0 printf "%b"> data.dat
 iconv -f greek -t UTF-8 -o data.dat data.dat
-sed -E 's/(\&cidReq\=MECH.*)|(goto..url..)//g' data.dat > correctname.txt
+sed -E 's/(\&cidReq\=.*)|(goto..url..)//g' data.dat > correctname.txt
 
 IFS=$'\n' read -d '' -r -a filename < correctname.txt
+ls -la > data.dat
 
 for((i=0; i<$ndowns ; i++));do
 	echo -e "$TABS|---$(echo ${filename[i]} | sed 's:.*/::')"
@@ -199,7 +210,7 @@ cat data.dat |  sed "s@+@ @g;s@%@\\\\x@g" | xargs -0 printf "%b"> correctname.tx
 iconv -f greek -t UTF-8 -o correctname.txt correctname.txt 
 IFS=$'\n' read -d '' -r -a locaten < correctname.txt
 
-rm download.txt correctname.txt folders.txt data.dat document.php
+rm download.txt correctname.txt folders.txt data.dat document.php correctCourseName.txt
 
 for((i=0; i<$nfolders ; i++)); do
 	cd $WORKDIR
