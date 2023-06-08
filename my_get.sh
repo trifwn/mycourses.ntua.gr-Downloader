@@ -145,6 +145,7 @@ then
 	#IFS=$'\n' read -d '\n' -r -a COURSE < correctCourseName.txt
 	
 	echo $COURSE
+
 	wget -q --load-cookies cookies.txt https://mycourses.ntua.gr/document/document.php
 	
 	if ! { [ "$(cat document.php | grep 'login' )" == "" ]; };then 
@@ -166,7 +167,7 @@ else
 	loc="$WORKDIR/$COURSE$LOCATION"
 	cd $loc
 	echo -e "$TABS${RED}$(echo $LOCATION | sed 's:.*/::')${NC}"
-	wget -q --load-cookies "$WORKDIR/cookies.txt" -P "$WORKDIR/$COURSE/$LOCATION/" -O document.php "http://mycourses.ntua.gr$FILE"
+	wget -q --load-cookies "$WORKDIR/cookies.txt" -P "$WORKDIR/$COURSE/$LOCATION/" -O document.php "https://mycourses.ntua.gr$FILE"
 fi
 TABS="$TABS|   "
 grep -no '<a class="item-file-link simple "' document.php | awk -F: '{print $1}' > data.dat
@@ -197,7 +198,7 @@ ls -la > data.dat
 
 for((i=0; i<$ndowns ; i++));do
 	echo -e "$TABS|---$(echo ${filename[i]} | sed 's:.*/::')"
-	wget -q -O "$WORKDIR/$COURSE/${filename[i]}" "http://mycourses.ntua.gr/document/${downs[i]}" 
+	wget -q -O "$WORKDIR/$COURSE/${filename[i]}" "https://mycourses.ntua.gr/document/${downs[i]}" 
 done
 
 nfolders=$( cat folders.txt | wc -l);
